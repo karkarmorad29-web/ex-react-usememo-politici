@@ -1,4 +1,18 @@
-import { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
+
+function PoliticianCard({ name, image, position, biography, onImageError }) {
+  console.log('Card')
+  return (
+    <div className='card'>
+      <img src={image} alt={name} onError={onImageError} />
+      <h2>{name}</h2>
+      <p><strong>Posizione:</strong>{position}</p>
+      <p>{biography}</p>
+    </div>
+  );
+}
+
+const MemoizedPoliticianCard = React.memo(PoliticianCard);
 
 function App() {
   const [politicians, setPoliticians] = useState([])
@@ -27,19 +41,16 @@ function App() {
   return (
     <div>
       <h1>lista Politici</h1>
-      <input type="text"
+      <input
+        className='search-input'
+        type="text"
         placeholder='Cerca per nome o biografia'
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
       <div className='politicians-list'>
         {filteredPoliticians.map(politician => (
-          <div className='card' key={politician.id}>
-            <img src={politician.image} alt={politician.name} onError={handleImageError} />
-            <h2>{politician.name}</h2>
-            <p><strong>Posizione:</strong>{politician.position}</p>
-            <p>{politician.biography}</p>
-          </div>
+          <MemoizedPoliticianCard key={politician.id} {...politician} onImageError={handleImageError} />
         ))}
 
       </div>
