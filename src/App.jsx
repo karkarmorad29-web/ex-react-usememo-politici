@@ -15,8 +15,9 @@ function PoliticianCard({ name, image, position, biography, onImageError }) {
 const MemoizedPoliticianCard = React.memo(PoliticianCard);
 
 function App() {
-  const [politicians, setPoliticians] = useState([])
-  const [search, setSearch] = useState('')
+  const [politicians, setPoliticians] = useState([]);
+  const [search, setSearch] = useState('');
+  const [selectedPosition, setSelectedPosition] = useState('');
 
 
   const handleImageError = (e) => {
@@ -30,13 +31,25 @@ function App() {
       .catch(error => console.error(error));
   }, []);
 
+  const positions = useMemo(() => {
+    const uniquePositions = [];
+    politicians.forEach(p => {
+      if (!uniquePositions.includes(p.position)) {
+        uniquePositions.push(p.position);
+      }
+    });
+    return uniquePositions;
+  }, [politicians]);
+
   const filteredPoliticians = useMemo(() => {
     return politicians.filter(politician => {
       const isInName = politician.name.toLowerCase().includes(search.toLowerCase());
       const isInBio = politician.biography.toLowerCase().includes(search.toLowerCase());
-      return isInName || isInBio;
+      const isPositionValid = selectedPosition === '' ||
+        selectedPosition === politician.position;
+      return (isInName || isInBio) && isPositionValid;
     });
-  }, [politicians, search]);
+  }, [politicians, search, selectedPosition]);
 
   return (
     <div>
@@ -48,6 +61,14 @@ function App() {
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
+      <select
+        value={selectedPosition}
+        onChange={e => setSelectedPosition(e.target.value)}
+      >
+        {positions.map((position, index) => (
+          <option key={index} value={position}>{position}</option>
+        ))}
+      </select>
       <div className='politicians-list'>
         {filteredPoliticians.map(politician => (
           <MemoizedPoliticianCard key={politician.id} {...politician} onImageError={handleImageError} />
